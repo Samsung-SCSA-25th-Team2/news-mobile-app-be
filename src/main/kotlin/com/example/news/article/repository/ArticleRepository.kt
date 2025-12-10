@@ -1,0 +1,23 @@
+package com.example.news.article.repository
+
+import com.example.news.article.domain.Article
+import com.example.news.article.domain.ArticleSection
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.JpaRepository
+import java.time.LocalDateTime
+
+interface ArticleRepository : JpaRepository<Article, Long> {
+
+    fun findAllBySection(
+       section: ArticleSection,
+       pageable: Pageable
+    ): Page<Article> // 정렬은 Service에서 수행
+
+    fun findBySectionAndPublishedAtBetween(
+        section: ArticleSection,
+        start: LocalDateTime,
+        end: LocalDateTime
+    ): List<Article>
+
+}

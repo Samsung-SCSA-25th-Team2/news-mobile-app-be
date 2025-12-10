@@ -1,7 +1,8 @@
 package com.example.news.common.exception.handler
 
+import com.example.news.article.exception.ArticleNotFoundException
 import com.example.news.auth.exception.DuplicateEmailException
-import com.example.news.common.dto.ErrorResponse
+import com.example.news.common.dto.error.ErrorResponse
 import com.example.news.common.exception.UnauthorizedException
 import com.example.news.user.exception.UserNotFoundException
 import jakarta.validation.ConstraintViolationException
@@ -44,6 +45,17 @@ class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFound(e: UserNotFoundException): ResponseEntity<ErrorResponse> {
         logger.warn("사람을 찾을 수 없음 - 404: {}", e.message)
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(ErrorResponse(message = e.message))
+    }
+
+    /**
+     * ArticleNotFoundException -> 404 Not Found
+     */
+    @ExceptionHandler(ArticleNotFoundException::class)
+    fun handleArticleNotFound(e: ArticleNotFoundException): ResponseEntity<ErrorResponse> {
+        logger.warn("기사를 찾을 수 없음 - 404: {}", e.message)
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(message = e.message))

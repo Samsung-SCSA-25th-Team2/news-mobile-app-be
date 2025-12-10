@@ -1,4 +1,4 @@
-package com.example.news.common.dto
+package com.example.news.common.dto.error
 
 import java.time.LocalDateTime
 
