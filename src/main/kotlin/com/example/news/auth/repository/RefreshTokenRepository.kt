@@ -1,7 +1,6 @@
 package com.example.news.auth.repository
 
 import com.example.news.auth.domain.RefreshToken
-import com.example.news.user.domain.User
 import org.springframework.data.repository.CrudRepository
 
 /**

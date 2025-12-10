@@ -1,6 +1,7 @@
 package com.example.news.user.domain
 
 import com.example.news.bookmark.domain.Bookmark
+import com.example.news.common.domain.BaseEntity
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -26,4 +27,4 @@ class User(
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val bookmarks: MutableList<Bookmark> = mutableListOf()
 
-)
+) : BaseEntity()
