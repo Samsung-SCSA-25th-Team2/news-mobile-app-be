@@ -1,6 +1,7 @@
 package com.example.news.common.exception
 
 import com.example.news.common.dto.ErrorResponse
+import com.example.news.user.exception.UserNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -26,6 +27,16 @@ class GlobalExceptionHandler {
     fun handleUnauthorized(e: UnauthorizedException): ResponseEntity<ErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.UNAUTHORIZED)
+            .body(ErrorResponse(message = e.message))
+    }
+
+    /**
+     * UserNotFoundException -> 404 Not Found
+     */
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handleUserNotFound(e: UserNotFoundException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(message = e.message))
     }
 
