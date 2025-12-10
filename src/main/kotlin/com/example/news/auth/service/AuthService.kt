@@ -5,14 +5,13 @@ import com.example.news.auth.dto.jwt.ReissueRequest
 import com.example.news.auth.dto.jwt.TokenResponse
 import com.example.news.auth.dto.login.LoginRequest
 import com.example.news.auth.dto.signup.SignUpRequest
+import com.example.news.auth.exception.DuplicateEmailException
 import com.example.news.auth.jwt.JwtProperties
 import com.example.news.auth.jwt.JwtTokenProvider
 import com.example.news.auth.repository.RefreshTokenRepository
 import com.example.news.common.exception.UnauthorizedException
 import com.example.news.user.domain.User
 import com.example.news.user.repository.UserRepository
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,13 +30,12 @@ class AuthService(
     fun signup(request: SignUpRequest) {
         // Validation
         if (userRepository.existsByEmail(request.email)) {
-            throw UnauthorizedException("이미 존재하는 이메일입니다.")
+            throw DuplicateEmailException("이미 존재하는 이메일입니다.")
         }
 
         val user = User(
             email = request.email,
             password = passwordEncoder.encode(request.password)!!,
-            nickname = request.nickname
         )
 
         userRepository.save(user)
@@ -55,14 +53,14 @@ class AuthService(
         }
 
         // JWT 토큰 생성
-        val accessToken = jwtTokenProvider.createAccessToken(user.id)
-        val refreshToken = jwtTokenProvider.createRefreshToken(user.id)
+        val accessToken = jwtTokenProvider.createAccessToken(user.userId)
+        val refreshToken = jwtTokenProvider.createRefreshToken(user.userId)
 
         // RefreshToken Redis에 저장
-        refreshTokenRepository.deleteByUserId(user.id)
+        refreshTokenRepository.deleteByUserId(user.userId)
         refreshTokenRepository.save(
             RefreshToken(
-                userId = user.id,
+                userId = user.userId,
                 token = refreshToken,
                 ttl = jwtProperties.refreshTokenExpirationMs / 1000
             )
@@ -117,12 +115,8 @@ class AuthService(
     }
 
     @Transactional
-    fun logout(authentication: Authentication) {
+    fun logout(userId: Long) {
         // jwt를 헤더로 요청하면, 로그아웃이 가능하다.
-
-        val principal = authentication.principal as UserDetails
-        val userId = principal.username.toLong()
-
         refreshTokenRepository.deleteByUserId(userId)
     }
 
