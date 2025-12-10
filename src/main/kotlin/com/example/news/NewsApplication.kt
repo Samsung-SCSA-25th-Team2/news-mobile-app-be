@@ -7,7 +7,6 @@ import org.springframework.boot.runApplication
 
 @SpringBootApplication
 @EnableConfigurationProperties(JwtProperties::class)
-
 class NewsApplication
 
 fun main(args: Array<String>) {

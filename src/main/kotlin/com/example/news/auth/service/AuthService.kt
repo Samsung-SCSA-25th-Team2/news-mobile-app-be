@@ -8,6 +8,7 @@ import com.example.news.auth.dto.signup.SignUpRequest
 import com.example.news.auth.jwt.JwtProperties
 import com.example.news.auth.jwt.JwtTokenProvider
 import com.example.news.auth.repository.RefreshTokenRepository
+import com.example.news.common.exception.UnauthorizedException
 import com.example.news.user.domain.User
 import com.example.news.user.repository.UserRepository
 import org.springframework.security.core.Authentication
@@ -30,7 +31,7 @@ class AuthService(
     fun signup(request: SignUpRequest) {
         // Validation
         if (userRepository.existsByEmail(request.email)) {
-            throw IllegalArgumentException("이미 존재하는 이메일입니다.")
+            throw UnauthorizedException("이미 존재하는 이메일입니다.")
         }
 
         val user = User(
@@ -47,10 +48,10 @@ class AuthService(
     fun login(request: LoginRequest): TokenResponse {
         // Validation
         val user = userRepository.findByEmail(request.email)
-            ?: throw IllegalArgumentException("가입되지 않은 이메일입니다.")
+            ?: throw UnauthorizedException("가입되지 않은 이메일입니다.")
 
         if (!passwordEncoder.matches(request.password, user.password)) {
-            throw IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.")
+            throw UnauthorizedException("이메일 또는 비밀번호가 올바르지 않습니다.")
         }
 
         // JWT 토큰 생성
@@ -79,7 +80,7 @@ class AuthService(
     fun reissue(request: ReissueRequest): TokenResponse {
         // Validation
         if (!jwtTokenProvider.validateRefreshToken(request.refreshToken)) {
-            throw IllegalArgumentException("리프레시 토큰이 유효하지 않습니다.")
+            throw UnauthorizedException("리프레시 토큰이 유효하지 않습니다.")
         }
 
         // refreshToken에서 userId 꺼내기
@@ -87,11 +88,11 @@ class AuthService(
 
         // Redis에서 조회
         val saved = refreshTokenRepository.findByUserId(userId)
-            ?: throw IllegalArgumentException("저장된 리프레시 토큰이 없습니다. 다시 로그인 해주세요.")
+            ?: throw UnauthorizedException("저장된 리프레시 토큰이 없습니다. 다시 로그인 해주세요.")
 
         // refreshToken 검증
         if (saved.token != request.refreshToken) {
-            throw IllegalArgumentException("리프레시 토큰이 저장소의 것과 일치하지 않습니다.")
+            throw UnauthorizedException("리프레시 토큰이 저장소의 것과 일치하지 않습니다.")
         }
 
         // accessToken + refreshToken 재발급
