@@ -17,7 +17,10 @@ class UserService(
         val user = userRepository.findById(userId)
             .orElseThrow { UserNotFoundException("해당 유저가 존재하지 않습니다.") }
 
-        return user.toResponse() // UserMapper 헬퍼함수 사용 : User -> UserResponse
+        // N+1 문제 방지: bookmarkCount를 별도 쿼리로 조회
+        val bookmarkCount = userRepository.countBookmarksByUserId(userId)
+
+        return user.toResponse(bookmarkCount)
     }
 
     @Transactional
