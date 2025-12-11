@@ -2,6 +2,7 @@ package com.example.news.article.controller
 
 import com.example.news.article.dto.ReactionRequest
 import com.example.news.article.service.ReactionService
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -26,12 +27,13 @@ class ReactionController(
     fun react(
         @PathVariable articleId: Long,
         @AuthenticationPrincipal principal: UserDetails,
-        @RequestBody request: ReactionRequest
+        @Valid @RequestBody request: ReactionRequest
     ): ResponseEntity<Unit> {
 
         val userId = principal.username.toLong()
 
-        reactionService.react(articleId, userId, request.type)
+        // @Valid + @NotNull 검증이 통과했으므로 type은 항상 non-null
+        reactionService.react(articleId, userId, request.type!!)
 
         return ResponseEntity.ok().build()
     }
