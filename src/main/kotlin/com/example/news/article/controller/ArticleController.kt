@@ -4,8 +4,11 @@ import com.example.news.article.domain.ArticleSection
 import com.example.news.article.dto.ArticleResponse
 import com.example.news.article.service.ArticleService
 import com.example.news.common.dto.pagination.PageResponse
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/articles")
 class ArticleController(
@@ -26,8 +30,8 @@ class ArticleController(
     @GetMapping
     fun getArticlesBySection(
         @RequestParam section: ArticleSection,              // ?section=TECHNOLOGY
-        @RequestParam(defaultValue = "0") page: Int,        // ?page=0
-        @RequestParam(defaultValue = "20") size: Int        // ?size=20
+        @RequestParam(defaultValue = "0") @Min(0) page: Int,        // ?page=0
+        @RequestParam(defaultValue = "20") @Min(1) @Max(100) size: Int        // ?size=20 (최대 100)
     ): ResponseEntity<PageResponse<ArticleResponse>> {
 
         val content = articleService.getAllArticlesBySection(section, page, size)
