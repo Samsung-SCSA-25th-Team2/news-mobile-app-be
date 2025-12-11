@@ -20,4 +20,9 @@ interface ArticleRepository : JpaRepository<Article, Long> {
         end: LocalDateTime
     ): List<Article>
 
+    /**
+     * URL 중복 검사 (크롤링 시 사용)
+     */
+    fun existsByUrl(url: String): Boolean
+
 }

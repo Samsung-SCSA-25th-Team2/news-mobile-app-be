@@ -28,7 +28,7 @@ class ArticleService(
         val pageable = PageRequest.of(
             page,
             size,
-            Sort.by(Sort.Direction.DESC, "publishedAt", "id")
+            Sort.by(Sort.Direction.DESC, "publishedAt", "articleId")
         )
         val findAllBySection = articleRepository.findAllBySection(section, pageable)
         val content = findAllBySection.content.map { it.toResponse() }

@@ -14,6 +14,9 @@ data class ArticleResponse(
     @Schema(description = "기사 제목", example = "AI 기술의 최신 동향")
     val title: String,
 
+    @Schema(description = "기사 본문", example = "RAG 기술이 현재 금융권에서 화두가 되고 있습니다. 하...")
+    val content: String?,
+
     @Schema(description = "기사 URL", example = "https://example.com/article/123")
     val url: String,
 
@@ -27,5 +30,12 @@ data class ArticleResponse(
     val publisher: String?,
 
     @Schema(description = "기사 발행 시간", example = "2025-12-11T10:30:00")
-    val publishedAt: LocalDateTime
+    val publishedAt: LocalDateTime,
+
+    @Schema(description = "좋아요 수", example = "100")
+    val likes: Long,
+
+    @Schema(description = "싫어요 수", example = "50")
+    val dislikes: Long
+
 )
