@@ -26,7 +26,7 @@ import jakarta.persistence.UniqueConstraint
 class Bookmark (
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0L,
+    val bookmarkId: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

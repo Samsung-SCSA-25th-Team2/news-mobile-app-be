@@ -1,8 +1,6 @@
 package com.example.news.article.domain
 
-import com.example.news.bookmark.domain.Bookmark
 import com.example.news.common.domain.BaseEntity
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -10,8 +8,8 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Version
 import java.time.LocalDateTime
 
 @Entity
@@ -19,7 +17,7 @@ import java.time.LocalDateTime
 class Article (
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val articleId: Long = 0L,
+    val articleId: Long? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
@@ -46,7 +44,19 @@ class Article (
     @Column(nullable = false)
     val publishedAt: LocalDateTime,
 
-    @OneToMany(mappedBy = "article", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val bookmarks: MutableList<Bookmark> = mutableListOf()
+    // ✅ 제거: 양방향 관계 불필요
+    // "내 북마크만 조회"하므로 BookmarkRepository.findByUserId()로 충분
+    // Article 삭제 시 Bookmark는 @OnDelete(CASCADE) 또는 BookmarkRepository로 처리
+
+    // ✅ 좋아요 / 싫어요 카운트
+    @Column(nullable = false)
+    var likes: Long = 0L,
+
+    @Column(nullable = false)
+    var dislikes: Long = 0L,
+
+    // ✅ Optimistic Lock (버전 필드)
+    @Version
+    var version: Long? = null
 
 ) : BaseEntity()

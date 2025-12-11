@@ -9,7 +9,7 @@ import com.example.news.user.dto.UserResponse
  */
 fun User.toResponse(bookmarkCount: Int): UserResponse =
     UserResponse(
-        id = this.userId,
+        id = this.userId!!,
         email = this.email,
         bookmarkCount = bookmarkCount
     )

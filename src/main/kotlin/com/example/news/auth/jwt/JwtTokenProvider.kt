@@ -35,10 +35,10 @@ class JwtTokenProvider(
         val expiration = Date(now.time + jwtProperties.accessTokenExpirationMs)
 
         return Jwts.builder()
-            .setSubject(userId.toString()) // jwt 고유 식별자 -> userId
+            .subject(userId.toString()) // jwt 고유 식별자 -> userId
             .claim("role", role) // claim(jwt 속성)에 role 추가
-            .setIssuedAt(now) // 발급시간
-            .setExpiration(expiration) // 만료시간
+            .issuedAt(now) // 발급시간
+            .expiration(expiration) // 만료시간
             .signWith(accessKey, SignatureAlgorithm.HS256) // HS256 방식으로 서명
             .compact() // 하나의 String으로 합치기
     }

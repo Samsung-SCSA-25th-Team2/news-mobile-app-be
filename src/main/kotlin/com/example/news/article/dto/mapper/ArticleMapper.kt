@@ -4,7 +4,7 @@ import com.example.news.article.domain.Article
 import com.example.news.article.dto.ArticleResponse
 
 fun Article.toResponse() = ArticleResponse(
-    articleId = this.articleId,
+    articleId = this.articleId!!,
     section = this.section.name,
     title = this.title,
     url = this.url,

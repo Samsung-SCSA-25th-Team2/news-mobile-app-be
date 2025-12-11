@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component
 data class JwtProperties(
     // data class는 파라미터에 기본값이 필요함
 
-    val accessTokenSecret: String = "",
-    val refreshTokenSecret: String = "",
-    val accessTokenExpirationMs: Long = 0,
-    val refreshTokenExpirationMs: Long = 0
+    var accessTokenSecret: String = "",
+    var refreshTokenSecret: String = "",
+    var accessTokenExpirationMs: Long = 0,
+    var refreshTokenExpirationMs: Long = 0
 )

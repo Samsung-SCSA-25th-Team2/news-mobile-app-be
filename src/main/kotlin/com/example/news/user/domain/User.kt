@@ -1,14 +1,11 @@
 package com.example.news.user.domain
 
-import com.example.news.bookmark.domain.Bookmark
 import com.example.news.common.domain.BaseEntity
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 
 @Entity
@@ -16,15 +13,15 @@ import jakarta.persistence.Table
 class User(
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val userId: Long = 0L,
+    val userId: Long? = null,
 
     @Column(nullable = false, unique = true)
     var email: String = "",
 
     @Column(nullable = false)
-    var password: String = "",
+    var password: String = ""
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val bookmarks: MutableList<Bookmark> = mutableListOf()
+    // ✅ 제거: 양방향 관계 불필요
+    // BookmarkRepository로 조회: findByUserId(userId)
 
 ) : BaseEntity()
