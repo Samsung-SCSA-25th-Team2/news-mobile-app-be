@@ -29,7 +29,7 @@ class SecurityConfig(
                     "/api/v1/auth/login",
                     "/api/v1/auth/reissue",
                     "/api/v1/articles",
-                    "/api/v1/articles/**/random",
+                    "/api/v1/articles/*/random",
                     "/swagger-ui/**",                // Swagger UI
                     "/v3/api-docs/**",               // OpenAPI 스펙
                     "/swagger-resources/**"          // Swagger 리소스
