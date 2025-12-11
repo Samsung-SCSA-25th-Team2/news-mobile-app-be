@@ -63,15 +63,11 @@ class BookmarkService(
         page: Int,
         size: Int
     ): PageResponse<ArticleResponse> {
+        
+        // pageable 생성 (정렬은 메서드명에 포함되어 있으므로 별도 지정 불필요)
+        val pageable = PageRequest.of(page, size)
 
-        // pageable 커스텀해서 생성
-        val pageable = PageRequest.of(
-            page,
-            size,
-            Sort.by(Sort.Direction.DESC, "createdAt")
-        )
-
-        // 커스텀한 pageable로 Page 뽑기
+        // Page 조회
         val bookmarkPage = bookmarkRepository.findByUserUserIdOrderByCreatedAtDesc(
             userId = userId,
             pageable = pageable
