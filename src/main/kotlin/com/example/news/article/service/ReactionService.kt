@@ -56,6 +56,7 @@ class ReactionService(
                     ReactionType.DISLIKE -> article.dislikes -= 1
                     ReactionType.NONE -> {}
                 }
+                reactionRepository.delete(existing)
             }
 
             // 기존 반응 있음 + 새 type 이 다름 (LIKE ↔ DISLIKE 변경)
