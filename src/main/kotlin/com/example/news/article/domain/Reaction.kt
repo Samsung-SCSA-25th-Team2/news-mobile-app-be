@@ -8,7 +8,7 @@ import jakarta.persistence.*
     name = "article_reactions",
     uniqueConstraints = [
         UniqueConstraint(
-            name = "unique_article_user",
+            name = "uk_article_user",
             columnNames = ["article_id", "user_id"]
         )
     ]

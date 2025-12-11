@@ -1,5 +1,6 @@
 package com.example.news.user.service
 
+import com.example.news.bookmark.repository.BookmarkRepository
 import com.example.news.user.dto.UserResponse
 import com.example.news.user.dto.mapper.toResponse
 import com.example.news.user.exception.UserNotFoundException
@@ -10,7 +11,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class UserService(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val bookmarkRepository: BookmarkRepository
 ) {
 
     fun getUserById(userId: Long) : UserResponse {
@@ -29,6 +31,10 @@ class UserService(
             throw UserNotFoundException("해당 유저가 존재하지 않습니다.")
         }
 
+        // 1. 먼저 해당 유저의 모든 북마크 삭제 (양방향 관계 제거로 수동 처리 필요)
+        bookmarkRepository.deleteAllByUserId(userId)
+
+        // 2. 유저 삭제
         userRepository.deleteById(userId)
     }
 
