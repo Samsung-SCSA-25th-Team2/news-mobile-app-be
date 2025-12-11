@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Version
 import java.time.LocalDateTime
 
 @Entity
@@ -47,6 +48,17 @@ class Article (
     val publishedAt: LocalDateTime,
 
     @OneToMany(mappedBy = "article", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val bookmarks: MutableList<Bookmark> = mutableListOf()
+    val bookmarks: MutableList<Bookmark> = mutableListOf(),
+
+    // ✅ 좋아요 / 싫어요 카운트
+    @Column(nullable = false)
+    var likes: Long = 0L,
+
+    @Column(nullable = false)
+    var dislikes: Long = 0L,
+
+    // ✅ Optimistic Lock (버전 필드)
+    @Version
+    var version: Long? = null
 
 ) : BaseEntity()
