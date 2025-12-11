@@ -7,9 +7,12 @@ fun Article.toResponse() = ArticleResponse(
     articleId = this.articleId!!,
     section = this.section.name,
     title = this.title,
+    content = this.content,
     url = this.url,
     thumbnailUrl = this.thumbnailUrl,
     source = this.source,
     publisher = this.publisher,
-    publishedAt = this.publishedAt
+    publishedAt = this.publishedAt,
+    likes = this.likes,
+    dislikes = this.dislikes
 )
