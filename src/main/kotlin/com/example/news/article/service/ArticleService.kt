@@ -19,6 +19,18 @@ class ArticleService(
     private val articleRepository: ArticleRepository
 ) {
 
+    fun getArticelById(
+        articleId: Long
+    ): ArticleResponse {
+        val article = articleRepository.findArticleByArticleId(articleId)
+
+        if (article == null) {
+            throw ArticleNotFoundException("해당 기사가 없습니다.")
+        }
+
+        return article.toResponse()
+    }
+
     fun getAllArticlesBySection(
         section: ArticleSection,
         page: Int,
