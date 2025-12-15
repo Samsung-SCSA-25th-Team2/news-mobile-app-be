@@ -33,6 +33,39 @@ class ArticleController(
 ) {
 
     @Operation(
+        summary = "기사 ID로 단일 기사 조회",
+        description = """
+            기사 ID를 사용하여 특정 기사의 상세 정보를 조회합니다.
+            **🔓 인증 불필요** - 누구나 기사를 조회할 수 있습니다.
+        """
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "기사 조회 성공",
+                content = [Content(schema = Schema(implementation = ArticleResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "기사를 찾을 수 없음",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
+    @GetMapping("/{articleId}")
+    fun getArticleById(
+        @Parameter(
+            description = "조회할 기사의 ID",
+            example = "1",
+            required = true
+        )
+        @PathVariable articleId: Long
+    ): ResponseEntity<ArticleResponse> {
+        return ResponseEntity.ok(articleService.getArticelById(articleId))
+    }
+
+    @Operation(
         summary = "섹션별 기사 목록 조회",
         description = """
             특정 섹션의 기사 목록을 최신순으로 조회합니다. 페이지네이션을 지원합니다.
