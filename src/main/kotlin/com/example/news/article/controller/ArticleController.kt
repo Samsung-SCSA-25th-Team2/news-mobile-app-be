@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -31,6 +32,19 @@ import java.time.LocalDate
 class ArticleController(
     private val articleService : ArticleService
 ) {
+
+    /**
+     * 현재 인증된 사용자의 ID를 가져오는 헬퍼 메서드
+     * 인증되지 않은 경우 null 반환
+     */
+    private fun getCurrentUserId(): Long? {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return if (authentication != null && authentication.isAuthenticated && authentication.name != "anonymousUser") {
+            authentication.name.toLongOrNull()
+        } else {
+            null
+        }
+    }
 
     @Operation(
         summary = "기사 ID로 단일 기사 조회",
@@ -62,7 +76,8 @@ class ArticleController(
         )
         @PathVariable articleId: Long
     ): ResponseEntity<ArticleResponse> {
-        return ResponseEntity.ok(articleService.getArticelById(articleId))
+        val userId = getCurrentUserId()
+        return ResponseEntity.ok(articleService.getArticelById(articleId, userId))
     }
 
     @Operation(
@@ -105,7 +120,8 @@ class ArticleController(
         @Parameter(description = "페이지 크기 (최대 100)", example = "20")
         @RequestParam(defaultValue = "20") @Min(1) @Max(100) size: Int
     ): ResponseEntity<PageResponse<ArticleResponse>> {
-        val content = articleService.getAllArticlesBySection(section, page, size)
+        val userId = getCurrentUserId()
+        val content = articleService.getAllArticlesBySection(section, page, size, userId)
         return ResponseEntity.ok(content)
     }
 
@@ -152,10 +168,12 @@ class ArticleController(
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         date: LocalDate?
     ): ResponseEntity<ArticleResponse> {
+        val userId = getCurrentUserId()
         val targetDate = date ?: LocalDate.now()
         val randomArticle = articleService.getRandomArticleBySectionAndDate(
             section = section,
-            date = targetDate
+            date = targetDate,
+            userId = userId
         )
         return ResponseEntity.ok(randomArticle)
     }
