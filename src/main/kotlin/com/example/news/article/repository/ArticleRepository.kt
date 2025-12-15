@@ -9,6 +9,8 @@ import java.time.LocalDateTime
 
 interface ArticleRepository : JpaRepository<Article, Long> {
 
+    fun findArticleByArticleId(articleId: Long): Article?
+
     fun findAllBySection(
        section: ArticleSection,
        pageable: Pageable
