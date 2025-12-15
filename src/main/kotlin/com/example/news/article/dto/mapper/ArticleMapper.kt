@@ -3,7 +3,7 @@ package com.example.news.article.dto.mapper
 import com.example.news.article.domain.Article
 import com.example.news.article.dto.ArticleResponse
 
-fun Article.toResponse() = ArticleResponse(
+fun Article.toResponse(userReaction: String? = null) = ArticleResponse(
     articleId = this.articleId!!,
     section = this.section.name,
     title = this.title,
@@ -14,5 +14,6 @@ fun Article.toResponse() = ArticleResponse(
     publisher = this.publisher,
     publishedAt = this.publishedAt,
     likes = this.likes,
-    dislikes = this.dislikes
+    dislikes = this.dislikes,
+    userReaction = userReaction
 )
