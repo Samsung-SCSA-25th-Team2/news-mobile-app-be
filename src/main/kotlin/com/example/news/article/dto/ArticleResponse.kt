@@ -36,6 +36,9 @@ data class ArticleResponse(
     val likes: Long,
 
     @Schema(description = "싫어요 수", example = "50")
-    val dislikes: Long
+    val dislikes: Long,
+
+    @Schema(description = "사용자의 반응 (LIKE, DISLIKE, null)", example = "LIKE", nullable = true)
+    val userReaction: String? = null
 
 )

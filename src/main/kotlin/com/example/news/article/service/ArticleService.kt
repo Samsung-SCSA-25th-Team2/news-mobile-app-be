@@ -1,10 +1,12 @@
 package com.example.news.article.service
 
+import com.example.news.article.domain.Article
 import com.example.news.article.domain.ArticleSection
 import com.example.news.article.dto.ArticleResponse
 import com.example.news.article.dto.mapper.toResponse
 import com.example.news.article.exception.ArticleNotFoundException
 import com.example.news.article.repository.ArticleRepository
+import com.example.news.article.repository.ReactionRepository
 import com.example.news.common.dto.pagination.PageResponse
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -16,11 +18,22 @@ import java.time.LocalDateTime
 @Service
 @Transactional(readOnly = true)
 class ArticleService(
-    private val articleRepository: ArticleRepository
+    private val articleRepository: ArticleRepository,
+    private val reactionRepository: ReactionRepository
 ) {
 
+    /**
+     * 사용자의 반응을 조회하는 헬퍼 메서드
+     */
+    private fun getUserReaction(articleId: Long, userId: Long?): String? {
+        if (userId == null) return null
+        val reaction = reactionRepository.findByArticleArticleIdAndUserId(articleId, userId)
+        return reaction?.type?.name
+    }
+
     fun getArticelById(
-        articleId: Long
+        articleId: Long,
+        userId: Long? = null
     ): ArticleResponse {
         val article = articleRepository.findArticleByArticleId(articleId)
 
@@ -28,13 +41,15 @@ class ArticleService(
             throw ArticleNotFoundException("해당 기사가 없습니다.")
         }
 
-        return article.toResponse()
+        val userReaction = getUserReaction(articleId, userId)
+        return article.toResponse(userReaction)
     }
 
     fun getAllArticlesBySection(
         section: ArticleSection,
         page: Int,
-        size: Int
+        size: Int,
+        userId: Long? = null
     ): PageResponse<ArticleResponse> {
 
         val pageable = PageRequest.of(
@@ -43,7 +58,10 @@ class ArticleService(
             Sort.by(Sort.Direction.DESC, "publishedAt", "articleId")
         )
         val findAllBySection = articleRepository.findAllBySection(section, pageable)
-        val content = findAllBySection.content.map { it.toResponse() }
+        val content = findAllBySection.content.map { article ->
+            val userReaction = getUserReaction(article.articleId!!, userId)
+            article.toResponse(userReaction)
+        }
 
         return PageResponse(
             content = content,
@@ -57,7 +75,8 @@ class ArticleService(
 
     fun getRandomArticleBySectionAndDate(
         section: ArticleSection,
-        date: LocalDate
+        date: LocalDate,
+        userId: Long? = null
     ): ArticleResponse {
 
         val startOfDay: LocalDateTime = date.atStartOfDay()
@@ -73,7 +92,9 @@ class ArticleService(
             throw ArticleNotFoundException("해당 날짜에 ${section} 섹션 기사가 없습니다.")
         }
 
-        return articles.random().toResponse()
+        val randomArticle = articles.random()
+        val userReaction = getUserReaction(randomArticle.articleId!!, userId)
+        return randomArticle.toResponse(userReaction)
     }
 
 }
