@@ -4,6 +4,7 @@ import com.example.news.article.domain.Article
 import com.example.news.article.domain.ArticleSection
 import com.example.news.article.repository.ArticleRepository
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -36,9 +37,9 @@ class NaverNewsCrawler(
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
     /**
-     * 5분마다 실행 (이전 작업 종료 후 5분 뒤 실행)
+     * 5분마다 실행 (이전 작업 종료 후 30분 뒤 실행)
      */
-    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 30, timeUnit = TimeUnit.MINUTES)
     fun crawlNewsBatch() {
         log.info("🔄 [Batch] 네이버 뉴스 크롤링 시작: ${LocalDateTime.now()}")
 
@@ -274,6 +275,9 @@ class NaverNewsCrawler(
                 .timeout(5000)
                 .get()
 
+            // prettyPrint를 false로 설정하여 원본 개행 유지
+            doc.outputSettings().prettyPrint(false)
+
             // 1. 제목
             val title = doc.selectFirst(".media_end_head_headline, #title_area span, .end_tit")?.text() ?: ""
 
@@ -294,6 +298,10 @@ class NaverNewsCrawler(
 
             // 불필요 태그 제거
             contentEl?.select(".img_desc, .byline, .copyright, .media_end_head_journalist_layer, script, style")?.remove()
+
+            // 개행 처리: <br> 태그를 \n으로, <p> 태그 앞뒤에 \n 추가
+            contentEl?.select("br")?.append("\\n")
+            contentEl?.select("p")?.prepend("\\n\\n")
 
             val content = contentEl?.text() ?: ""
 
