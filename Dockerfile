@@ -1,15 +1,26 @@
-# 1. Runtime 이미지 (권장)
+# Stage 1: Build
+FROM eclipse-temurin:17-jdk AS builder
+
+WORKDIR /build
+
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+COPY src src
+
+RUN chmod +x ./gradlew
+
+# 테스트 제외하고 빌드
+RUN ./gradlew clean build -x test --no-daemon
+
+# Stage 2: Runtime
 FROM eclipse-temurin:17-jre
 
-# 2. 작업 디렉토리
 WORKDIR /app
 
-# 3. JAR 복사
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
+COPY --from=builder /build/build/libs/*.jar app.jar
 
-# 4. Cloud Run / Docker 공통 포트
 EXPOSE 8080
 
-# 5. 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
