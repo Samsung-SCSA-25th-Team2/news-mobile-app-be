@@ -58,8 +58,8 @@ class SwaggerConfig {
             )
             .addServersItem(
                 Server()
-                    .url("http://localhost:8080")
-                    .description("로컬 개발 서버")
+                    .url("https://was-my-news-mobile-app-5867658782.us-central1.run.app")
+                    .description("운영 서버")
             )
             .components(components)
             .addSecurityItem(securityRequirement)

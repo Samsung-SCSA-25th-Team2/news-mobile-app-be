@@ -138,6 +138,7 @@ class NaverNewsCrawler(
                 content = detail.content,
                 thumbnailUrl = listThumb ?: detail.thumbnailUrl,
                 publisher = detail.publisher,
+                reporter = detail.reporter, // ✅ 기자명(이름만)
                 publishedAt = detail.publishedAt
             )
         }
@@ -164,7 +165,8 @@ class NaverNewsCrawler(
                     content = it.content.ifBlank { null },
                     url = it.url,
                     thumbnailUrl = it.thumbnailUrl,
-                    source = "NAVER",
+                    // ✅ reporter가 있으면 source에 기자명 저장, 없으면 NAVER
+                    source = it.reporter ?: "NAVER",
                     publisher = it.publisher,
                     publishedAt = it.publishedAt,
                     likes = 0L,
@@ -234,7 +236,8 @@ class NaverNewsCrawler(
     private fun parseDetail(doc: Document): Detail {
         doc.outputSettings().prettyPrint(false)
 
-        val title = doc.selectFirst(".media_end_head_headline, #title_area span, .end_tit")?.text().orEmpty()
+        val title = doc.selectFirst(".media_end_head_headline, #title_area span, .end_tit")
+            ?.text().orEmpty()
 
         val dateStr = doc.selectFirst(".media_end_head_info_datestamp_time")?.attr("data-date-time")
             ?.ifBlank { null }
@@ -259,13 +262,69 @@ class NaverNewsCrawler(
 
         val thumb = doc.selectFirst("meta[property=og:image]")?.attr("content")?.ifBlank { null }
 
+        // ✅ 기자명(이름만) 추출
+        val reporter = extractReporterNameOnly(doc)
+
         return Detail(
             title = title,
             content = content,
             publishedAt = publishedAt,
             publisher = publisher,
-            thumbnailUrl = thumb
+            thumbnailUrl = thumb,
+            reporter = reporter
         )
+    }
+
+    /**
+     * ✅ 기자명 "이름만" 추출
+     * - 다양한 케이스: "홍길동 기자", "홍길동 기자 = ..."
+     * - 이메일/부서/직함/문구가 붙어도 이름만 최대한 남김
+     * - 못 찾으면 null
+     */
+    private fun extractReporterNameOnly(doc: Document): String? {
+        // 우선 DOM에서 기자 관련 영역을 넓게 탐색
+        val raw = doc.selectFirst(
+            ".media_end_head_journalist_name, " +
+                    ".media_end_head_journalist, " +
+                    ".byline, " +
+                    ".journalistcard_summary_name, " +
+                    ".reporter_area, " +
+                    ".reporter, " +
+                    "span.byline_s"
+        )?.text()?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?: doc.selectFirst("meta[name=author]")?.attr("content")?.trim()
+                ?.takeIf { it.isNotBlank() }
+            ?: return null
+
+        // 공백 정리
+        val s = raw.replace(Regex("\\s+"), " ").trim()
+
+        // 1) "홍길동 기자" / "홍길동기자" / "홍길동 기자=" 등에서 이름만
+        // - "기자" 앞을 우선 추출
+        val beforeGija = s.substringBefore("기자", missingDelimiterValue = s).trim()
+        if (beforeGija.isNotBlank() && beforeGija != s) {
+            // "홍길동" 형태가 됨
+            return beforeGija
+                .substringAfterLast(" ") // 혹시 "정치부 홍길동" 같은 경우 마지막 토큰
+                .trim()
+                .takeIf { it.isNotBlank() }
+        }
+
+        // 2) 괄호/이메일/부서/슬래시/점 등 뒤에 붙는 정보 제거 시도
+        // ex) "홍길동" "(서울=연합뉴스)" 같은 이상 케이스 정리
+        val cleaned = s
+            .substringBefore("(")
+            .substringBefore("[")
+            .substringBefore("<")
+            .substringBefore("|")
+            .substringBefore("/")
+            .substringBefore("·")
+            .trim()
+
+        // 3) 마지막 토큰을 이름 후보로
+        val lastToken = cleaned.split(" ").lastOrNull()?.trim().orEmpty()
+        return lastToken.takeIf { it.isNotBlank() }
     }
 
     /**
@@ -481,6 +540,7 @@ class NaverNewsCrawler(
         val content: String,
         val thumbnailUrl: String?,
         val publisher: String?,
+        val reporter: String?, // ✅ 추가
         val publishedAt: LocalDateTime
     )
 
@@ -489,6 +549,7 @@ class NaverNewsCrawler(
         val content: String,
         val publishedAt: LocalDateTime,
         val publisher: String,
-        val thumbnailUrl: String?
+        val thumbnailUrl: String?,
+        val reporter: String? // ✅ 추가
     )
 }
