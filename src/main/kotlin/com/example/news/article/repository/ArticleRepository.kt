@@ -5,6 +5,8 @@ import com.example.news.article.domain.ArticleSection
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import java.time.LocalDateTime
 
 interface ArticleRepository : JpaRepository<Article, Long> {
@@ -26,5 +28,8 @@ interface ArticleRepository : JpaRepository<Article, Long> {
      * URL 중복 검사 (크롤링 시 사용)
      */
     fun existsByUrl(url: String): Boolean
+
+    @Query("select a.url from Article a where a.url in :urls")
+    fun findExistingUrls(@Param("urls") urls: Set<String>): Set<String>
 
 }
